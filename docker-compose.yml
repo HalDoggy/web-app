@@ -9,4 +9,10 @@ services:
     command: sh -c "cd frontend-react && yarn start"
     ports:
       - "3000:3000"
-    
+
+  backend-rust:
+    build: 
+      context: ./backend/backend-rust
+      dockerfile: Dockerfile
+    ports:
+      - "8765:8765"
