@@ -1,16 +1,21 @@
 import React, {useState} from 'react'; 
 
-const Form = () => {
+const Form = ({ products, onAdd, onDelete }) => {
     const [productName, setProductName] = useState('');
     const [productPrice, setProductPrice] = useState('');
 
     const handleAdd = () => {
-        console.log(productName, productPrice);
+        onAdd({ name: productName, price: productPrice });
+        setProductName('');
+        setProductPrice('');
     };
 
     return (
         <div>
-            <input type="text" placeholder="Product Name" value={productName} onChange={(e) => setProductName(e.target.value)} />
+            <input type="text" placeholder="Product Name" 
+            value={productName} 
+            onChange={(e) => setProductName(e.target.value)}/>
+
             <input type="number" placeholder="Product Price" value={productPrice} 
             onChange={(e) => 
                 {
@@ -20,7 +25,7 @@ const Form = () => {
                     setProductPrice(e.target.value)
                 }} 
             min="0"/>
-            <button onClick={handleAdd}>Add</button>
+            <button onClick={handleAdd}>追加</button>
         </div>
     );
 };
