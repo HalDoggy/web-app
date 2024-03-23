@@ -26,10 +26,11 @@ const Form = ({ products, onAdd, onDelete }) => {
         } catch (error) {
           console.error('ネットワークエラー:', error);
         }
+        
+        onAdd();
       };
 
     const handleAdd = () => {
-        onAdd({ name: productName, price: productPrice });
         postData();
         setProductName('');
         setProductPrice('');

@@ -24,21 +24,23 @@ function App() {
       .catch((error) => console.log(error));
   }, []);
 
-  const handleAddProduct = (product) => {
-    setProducts([...products, product]);
+  const handleAddProduct = () => {
+    fetchProducts()
+      .then((data) => setProducts(data))
+      .catch((error) => console.log(error));
   };
 
-  const handleDeleteProduct = async (id, index) => {
-    const newProducts = [...products];
-    newProducts.splice(index, 1);
-    setProducts(newProducts);
-    
+  const handleDeleteProduct = async (id, index) => {    
     try {
       const url = 'http://localhost:8765/delete/' + id;
       const response = await fetch(url, { method: 'DELETE' });
     } catch (error) {
       throw new Error('Failed to delete product, id: ' + id + ', index: ' + index + ' from the backend API');
     }
+
+    fetchProducts()
+      .then((data) => setProducts(data))
+      .catch((error) => console.log(error));
   };
 
   return (
