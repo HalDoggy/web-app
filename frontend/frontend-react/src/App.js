@@ -1,10 +1,28 @@
 import logo from './logo.svg';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import Form from './Form';
 
 function App() {
   const [products, setProducts] = useState([]);
+
+  const fetchProducts = async () => {
+    try {
+      const url = 'http://localhost:8765/products';
+      const response = await fetch(url, { method: 'GET' });
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      throw new Error('Failed to fetch products');
+    }
+  };
+
+  useEffect(() => {
+    // Fetch products from backend API
+    fetchProducts()
+      .then((data) => setProducts(data))
+      .catch((error) => console.log(error));
+  }, []);
 
   const handleAddProduct = (product) => {
     setProducts([...products, product]);
