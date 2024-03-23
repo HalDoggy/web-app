@@ -35,7 +35,7 @@ async fn _get_products() -> Vec<ProductInfo> {
 
 #[tokio::main]
 async fn get() -> Result<Vec<ProductInfo>, Error> {
-    let pg_yrl = "postgres://myuser:mypassword@localhost:5432/mydb";
+    let pg_yrl = "postgres://myuser:mypassword@db:5432/mydb";
     let (client, connection) 
         = tokio_postgres::connect(pg_yrl, NoTls).await?;
 
@@ -76,7 +76,7 @@ async fn add_product(info: web::Json<ProductInfoReq>) -> impl Responder {
 #[tokio::main]
 async fn post(info: web::Json<ProductInfoReq>) -> Result<(), Error> {
     println!("post");
-    let pg_yrl = "postgres://myuser:mypassword@localhost:5432/mydb";
+    let pg_yrl = "postgres://myuser:mypassword@db:5432/mydb";
     let (client, connection) 
         = tokio_postgres::connect(pg_yrl, NoTls).await?;
 
@@ -114,7 +114,7 @@ async fn delete(id: web::Path<i32>) -> impl Responder {
 #[tokio::main]
 async fn _delete(id: web::Path<i32>) -> Result<(), Error> {
     println!("_delete");
-    let pg_yrl = "postgres://myuser:mypassword@localhost:5432/mydb";
+    let pg_yrl = "postgres://myuser:mypassword@db:5432/mydb";
     let (client, connection) 
         = tokio_postgres::connect(pg_yrl, NoTls).await?;
 
