@@ -1,7 +1,7 @@
 use dotenv::dotenv;
 use std::env;
 use tokio_postgres::{NoTls, Error};
-use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{delete, web, App, HttpResponse, HttpServer, Responder};
 use serde;
 use actix_rt;
 use actix_cors::Cors;
@@ -97,6 +97,46 @@ async fn post(info: web::Json<ProductInfoReq>) -> Result<(), Error> {
     }
 }
 
+#[delete("/delete/{id}")]
+async fn delete(id: web::Path<i32>) -> impl Responder {
+    println!("delete");
+
+    match _delete(id) {
+        Ok(_) => {println!("Data inserted successfully!"); HttpResponse::Ok().body("Deleted".to_string())},
+        Err(e) => {
+            println!("Error inserting data: {}", e);
+            HttpResponse::ExpectationFailed().body("Error deleting data".to_string())
+        },
+    }
+}
+
+
+#[tokio::main]
+async fn _delete(id: web::Path<i32>) -> Result<(), Error> {
+    println!("_delete");
+    let pg_yrl = "postgres://myuser:mypassword@localhost:5432/mydb";
+    let (client, connection) 
+        = tokio_postgres::connect(pg_yrl, NoTls).await?;
+
+    // 接続タスクをスポーンして実行
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
+
+    match client.execute(
+        "DELETE FROM products WHERE product_id = $1",
+        &[id.as_ref()],
+    ).await {
+        Ok(_) => {println!("Data inserted successfully!"); Ok(())},
+        Err(e) => {
+            println!("Error inserting data: {}", e);
+            Err(e)
+        },
+    }
+}
+
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
@@ -109,6 +149,7 @@ async fn main() -> std::io::Result<()> {
         )
         .route("/add", web::post().to(add_product))
         .route("/products", web::get().to(get_products))
+        .service(delete)
     })
     .bind("0.0.0.0:8765")?
     .run()
