@@ -28,10 +28,17 @@ function App() {
     setProducts([...products, product]);
   };
 
-  const handleDeleteProduct = (index) => {
+  const handleDeleteProduct = async (id, index) => {
     const newProducts = [...products];
     newProducts.splice(index, 1);
     setProducts(newProducts);
+    
+    try {
+      const url = 'http://localhost:8765/delete/' + id;
+      const response = await fetch(url, { method: 'DELETE' });
+    } catch (error) {
+      throw new Error('Failed to delete product, id: ' + id + ', index: ' + index + ' from the backend API');
+    }
   };
 
   return (
@@ -39,7 +46,7 @@ function App() {
       {products.map((product, index) => (
         <div key={index}>
           <span>{product.name} - {product.price}円</span>
-          <button onClick={() => handleDeleteProduct(index)}>削除</button>
+          <button onClick={() => handleDeleteProduct(product.id, index)}>削除</button>
         </div>
       ))}
       <Form
