@@ -14,11 +14,17 @@ struct ProductInfo {
     price: i32,
 }
 
-async fn get_products() -> impl Responder {
-    HttpResponse::Ok().json(_get_products())
+#[derive(serde::Deserialize, serde::Serialize)]
+struct ProductInfoReq {
+    name: String,
+    price: i32,
 }
 
-fn _get_products() -> Vec<ProductInfo> {
+async fn get_products() -> impl Responder {
+    HttpResponse::Ok().json(_get_products().await)
+}
+
+async fn _get_products() -> Vec<ProductInfo> {
     match get() {
         Ok(products) => return products,
         Err(_) => {
@@ -58,9 +64,37 @@ async fn get() -> Result<Vec<ProductInfo>, Error> {
     Ok(products)
 }
 
-async fn add_product(info: web::Json<ProductInfo>) -> impl Responder {
-    let response = format!("id: {}, name: {}, price: {}", info.id, info.name, info.price);
-    HttpResponse::Ok().body(response)
+async fn add_product(info: web::Json<ProductInfoReq>) -> impl Responder {
+    println!("add_product");
+    let response = format!("id: {}, name: {}, price: {}", -1, info.name, info.price);
+    match post(info) {
+        Ok(_) => {println!("Data inserted successfully!"); HttpResponse::Ok().body(response)},
+        Err(e) => {println!("Error inserting data: {}", e); HttpResponse::ExpectationFailed().body("Error inserting data".to_string())},
+    }
+}
+
+#[tokio::main]
+async fn post(info: web::Json<ProductInfoReq>) -> Result<(), Error> {
+    println!("post");
+    let pg_yrl = "postgres://myuser:mypassword@localhost:5432/mydb";
+    let (client, connection) 
+        = tokio_postgres::connect(pg_yrl, NoTls).await?;
+
+    // 接続タスクをスポーンして実行
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
+
+    // データ挿入
+    match client.execute(
+        "INSERT INTO products (product_name, price) VALUES ($1, $2)",
+        &[&(info.name), &(info.price)],
+    ).await {
+        Ok(_) => {println!("Data inserted successfully!"); Ok(())},
+        Err(e) => {Err(e)},
+    }
 }
 
 #[actix_rt::main]
